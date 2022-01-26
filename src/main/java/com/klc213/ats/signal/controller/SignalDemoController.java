@@ -42,10 +42,10 @@ public class SignalDemoController {
 	}
 	
 	
-	@PostMapping(path="/start", produces=MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path="/startDemo", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<Object> start() {
-		LOGGER.info(">>>>controller start is called");
+		LOGGER.info(">>>>controller startDemo is called");
 
 		ObjectNode objectNode = mapper.createObjectNode();
 	
@@ -62,19 +62,19 @@ public class SignalDemoController {
 			LOGGER.error(">>> errMsg={}, stacktrace={}",errMsg,stackTrace);
 		}
 		
-		LOGGER.info(">>>>controller start finished ");
+		LOGGER.info(">>>>controller startDemo finished ");
 		
 		return new ResponseEntity<Object>(objectNode, HttpStatus.OK);
 	}
-	@PostMapping(path="/stop", produces=MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path="/stopDemo", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<Object> stop() {
-		LOGGER.info(">>>>controller stop is called");
+	public ResponseEntity<Object> stopDemo() {
+		LOGGER.info(">>>>controller stopDemo is called");
 
 		ObjectNode objectNode = mapper.createObjectNode();
 	
 		try {
-			demoService.start();
+			demoService.stop();
 			
 			objectNode.put("returnCode", "0000");
 		} catch (Exception e) {
@@ -86,7 +86,7 @@ public class SignalDemoController {
 			LOGGER.error(">>> errMsg={}, stacktrace={}",errMsg,stackTrace);
 		}
 		
-		LOGGER.info(">>>>controller stop finished ");
+		LOGGER.info(">>>>controller stopDemo finished ");
 		
 		return new ResponseEntity<Object>(objectNode, HttpStatus.OK);
 	}
