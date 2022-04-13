@@ -42,10 +42,10 @@ public class SignalDemoController {
 	}
 	
 	
-	@PostMapping(path="/startDemo", produces=MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path="/start", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<Object> start() {
-		LOGGER.info(">>>>controller startDemo is called");
+		LOGGER.info(">>>>controller start is called");
 
 		ObjectNode objectNode = mapper.createObjectNode();
 	
@@ -66,15 +66,15 @@ public class SignalDemoController {
 		
 		return new ResponseEntity<Object>(objectNode, HttpStatus.OK);
 	}
-	@PostMapping(path="/stopDemo", produces=MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path="/stop", produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public ResponseEntity<Object> stopDemo() {
-		LOGGER.info(">>>>controller stopDemo is called");
+	public ResponseEntity<Object> stop() {
+		LOGGER.info(">>>>controller stop is called");
 
 		ObjectNode objectNode = mapper.createObjectNode();
 	
 		try {
-			demoService.stop();
+			demoService.stopRun();
 			
 			objectNode.put("returnCode", "0000");
 		} catch (Exception e) {
