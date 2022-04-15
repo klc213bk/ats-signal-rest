@@ -1,8 +1,13 @@
 package com.klc213.ats.signal.service;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
@@ -16,7 +21,11 @@ public class DemoSignalRunner implements Runnable {
 	
 	private final KafkaConsumer<String, String> consumer;
 	
-	public DemoSignalRunner(int id, String groupId)  {
+	private List<String> topicList;
+	
+	public DemoSignalRunner(int id, String groupId, List<String> topicList)  {
+		
+		this.topicList = topicList;
 		
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
@@ -37,7 +46,23 @@ public class DemoSignalRunner implements Runnable {
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		consumer.subscribe(topicList);
+		
+		List<ConsumerRecord<String, String>> buffer = new ArrayList<>();
+		while (!closed.get()) {
+			ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+			for (ConsumerRecord<String, String> record : records) {
+				buffer.add(record);
+			}
+
+			if (buffer.size() > 0) {
+				process(buffer);
+
+				consumer.commitSync();
+
+				buffer.clear();
+			}
+		}
 		
 	}
 	
@@ -45,5 +70,7 @@ public class DemoSignalRunner implements Runnable {
 		closed.set(true);
 		consumer.wakeup();
 	}
-
+	public void process(List<ConsumerRecord<String, String>> buffer) {
+		
+	}
 }
