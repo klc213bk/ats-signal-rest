@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.klc213.ats.common.TopicEnum;
+import com.klc213.ats.common.util.KafkaUtils;
 
 
 public class DemoSignalRunner implements Runnable {
@@ -23,9 +27,9 @@ public class DemoSignalRunner implements Runnable {
 	
 	private List<String> topicList;
 	
-	public DemoSignalRunner(int id, String groupId, List<String> topicList)  {
-		
-		this.topicList = topicList;
+	private String realtimeTopicSPY;
+	
+	public DemoSignalRunner(int id, String groupId)  {
 		
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
@@ -41,6 +45,13 @@ public class DemoSignalRunner implements Runnable {
 		props.put("max.poll.records", 50 );
 		props.put("auto.offset.reset", "earliest" );
 		this.consumer = new KafkaConsumer<>(props);
+		
+		topicList = new ArrayList<>();
+		
+		this.realtimeTopicSPY = KafkaUtils.getTwsMktDataRealtimeTopic("SPY");
+		
+		topicList.add(TopicEnum.TWS_ACCOUNT.getTopic());
+		topicList.add(realtimeTopicSPY);
 		
 	}
 	
@@ -72,5 +83,12 @@ public class DemoSignalRunner implements Runnable {
 	}
 	public void process(List<ConsumerRecord<String, String>> buffer) {
 		
+		for (ConsumerRecord record : buffer) {
+			LOGGER.info(">>>record topic={}, key={},value={},offset={}", record.topic(), record.key(), record.value(), record.offset());
+			if (StringUtils.equals(realtimeTopicSPY, record.topic())) {
+				
+			}
+			
+		}
 	}
 }
