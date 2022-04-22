@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -14,6 +15,10 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.klc213.ats.common.AccountInfo;
+import com.klc213.ats.common.AtsBar;
 import com.klc213.ats.common.TopicEnum;
 import com.klc213.ats.common.util.KafkaUtils;
 
@@ -83,10 +88,28 @@ public class DemoSignalRunner implements Runnable {
 	}
 	public void process(List<ConsumerRecord<String, String>> buffer) {
 		
-		for (ConsumerRecord record : buffer) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+		for (ConsumerRecord<String, String> record : buffer) {
 			LOGGER.info(">>>record topic={}, key={},value={},offset={}", record.topic(), record.key(), record.value(), record.offset());
-			if (StringUtils.equals(realtimeTopicSPY, record.topic())) {
+			if (StringUtils.equals(TopicEnum.TWS_ACCOUNT.getTopic(), record.topic())) {
 				
+				try {
+					AccountInfo accountInfo = objectMapper.readValue(record.value(), AccountInfo.class);
+					LOGGER.debug(">>>record received accountInfo={}", ToStringBuilder.reflectionToString(accountInfo));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+			} else if (StringUtils.equals(realtimeTopicSPY, record.topic())) {
+				try {
+					AtsBar atsBar = objectMapper.readValue(record.value(), AtsBar.class);
+					LOGGER.debug(">>>record received atsBar={}", ToStringBuilder.reflectionToString(atsBar));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
 			}
 			
 		}
