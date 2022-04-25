@@ -25,6 +25,9 @@ import com.klc213.ats.common.AccountInfo;
 import com.klc213.ats.common.AtsBar;
 import com.klc213.ats.common.TopicEnum;
 import com.klc213.ats.common.util.KafkaUtils;
+import com.klc213.ats.signal.bean.PivotPoint;
+import com.klc213.ats.signal.bean.PriceSignal;
+import com.klc213.ats.signal.utils.StatisticsUtils;
 
 
 public class DemoSignalRunner implements Runnable {
@@ -42,7 +45,7 @@ public class DemoSignalRunner implements Runnable {
 
 	private AccountInfo accountInfo;
 
-	private Map<String, List<AtsBar>> realTimeBarsMap;
+	private Map<String, PriceSignal> realTimeBarsMap;
 
 	private ExecutorService executor;
 
@@ -73,7 +76,7 @@ public class DemoSignalRunner implements Runnable {
 		topicList.add(realtimeTopicSPY);
 
 		realTimeBarsMap = new HashMap<>();
-		realTimeBarsMap.put(SYMBOL_SPY, new ArrayList<AtsBar>());
+		realTimeBarsMap.put(SYMBOL_SPY, new PriceSignal());
 
 		executor = Executors.newFixedThreadPool(1);
 	}
@@ -140,6 +143,8 @@ public class DemoSignalRunner implements Runnable {
 								}
 
 							});
+						} else {
+							LOGGER.debug(">>>signalRunning is running. skip ");
 						}
 
 					} else {
@@ -155,8 +160,21 @@ public class DemoSignalRunner implements Runnable {
 		}
 	}
 	private void runSignal() {
-		LOGGER.debug(">>>runSignal accountInfo={}", ToStringBuilder.reflectionToString(accountInfo));
-		LOGGER.debug(">>>runSignal spy atsBar list size={}", realTimeBarsMap.get(SYMBOL_SPY).size());
+		LOGGER.debug(">>>accountInfo={}", ToStringBuilder.reflectionToString(accountInfo));
+		LOGGER.debug(">>>spy atsBar list size={}", realTimeBarsMap.get(SYMBOL_SPY).getBarSize());
 
+		PriceSignal priceSignal = realTimeBarsMap.get(SYMBOL_SPY);
+		Double sma = priceSignal.getSMA(5);
+	
+		LOGGER.debug(">>>sma={}", sma);
+		
+		AtsBar lastBar = priceSignal.getLastBar() ;
+		if (lastBar.getClose().doubleValue() > sma) {
+			// buy if no order or position
+		} else {
+			// sell  
+		}
+		
+		
 	}
 }
